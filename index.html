@@ -177,11 +177,24 @@
     0% { width: 0%; }
     100% { width: 100%; }
   }
+/* Estilo base (para telas maiores) */
+.testimonial img {
+  width: 100%;
+  aspect-ratio: 4 / 3; /* Formato retangular (4:3) para telas grandes */
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
 
-  @media (max-width: 768px) {
-    .carrossel .servico-item {
-      flex: 0 0 80%;
-    }
+/* Estilo para telas menores (dispositivos móveis) */
+@media (max-width: 768px) {
+  .testimonial img {
+    aspect-ratio: 1 / 1; /* Formato quadrado (1:1) para dispositivos móveis */
+  }
+}
+
  .testimonials {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
