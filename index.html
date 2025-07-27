@@ -195,21 +195,48 @@
   }
 }
 
- .testimonials {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+#depoimentos .carrossel {
+  display: flex;
+  transition: transform 0.4s ease-in-out;
   gap: 20px;
+  will-change: transform;
 }
-.testimonial img {
+#depoimentos .testimonial {
+  flex: 0 0 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  text-align: center;
+  padding: 10px;
+}
+#depoimentos .testimonial img {
   width: 100%;
   border-radius: 8px;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
   cursor: pointer;
   transition: transform 0.2s ease;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
-.testimonial img:hover {
+#depoimentos .testimonial img:hover {
   transform: scale(1.03);
 }
+#depoimentos .carrossel-btn {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 30px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  z-index: 10;
+}
+#depoimentos .carrossel-btn.left { left: 10px; }
+#depoimentos .carrossel-btn.right { right: 10px; }
+
 
 </style>
 </head>
@@ -257,21 +284,19 @@
 <section id="depoimentos">
   <h2>Depoimentos Reais</h2>
   <p>Veja o que nossos clientes estão dizendo sobre nós:</p>
-  <div class="testimonials">
-    <div class="testimonial">
-      <img src="imagens/depoimento1.png" alt="Depoimento 1" onclick="abrirLightbox(this.src)">
+  <div class="carrossel-container" id="depoimentos-container">
+    <button class="carrossel-btn left" onclick="moverDepoimento(-1)">❮</button>
+    <div class="carrossel" id="depoimentos-carrossel">
+      <div class="testimonial"><img src="imagens/depoimento1.png" alt="Depoimento 1" onclick="abrirLightbox(this.src)"></div>
+      <div class="testimonial"><img src="imagens/depoimento2.png" alt="Depoimento 2" onclick="abrirLightbox(this.src)"></div>
+      <div class="testimonial"><img src="imagens/depoimento3.png" alt="Depoimento 3" onclick="abrirLightbox(this.src)"></div>
+      <div class="testimonial"><img src="imagens/depoimento4.png" alt="Depoimento 4" onclick="abrirLightbox(this.src)"></div>
     </div>
-    <div class="testimonial">
-      <img src="imagens/depoimento2.png" alt="Depoimento 2" onclick="abrirLightbox(this.src)">
-    </div>
-    <div class="testimonial">
-      <img src="imagens/depoimento3.png" alt="Depoimento 3" onclick="abrirLightbox(this.src)">
-    </div>
-    <div class="testimonial">
-      <img src="imagens/depoimento4.png" alt="Depoimento 4" onclick="abrirLightbox(this.src)">
-    </div>
+    <button class="carrossel-btn right" onclick="moverDepoimento(1)">❯</button>
+    <div class="barra-progresso"><div class="progresso" id="progresso-depo"></div></div>
   </div>
 </section>
+
 
 <section id="realizados">
   <h2>Serviços Realizados</h2>
@@ -409,6 +434,56 @@ function fecharLightbox() {
   document.getElementById('lightbox').style.display = 'none';
 }
 </script>
+let depoIndiceAtual = 0;
+let depoScroll;
+const depoCarrossel = document.getElementById('depoimentos-carrossel');
+const depoContainer = document.getElementById('depoimentos-container');
+const progressoDepo = document.getElementById('progresso-depo');
+
+function moverDepoimento(direcao) {
+  const itemLargura = depoCarrossel.children[0].offsetWidth + 20;
+  const totalItens = depoCarrossel.children.length;
+  const visiveis = Math.floor(depoContainer.offsetWidth / itemLargura);
+  const maxIndice = totalItens - visiveis;
+
+  depoIndiceAtual += direcao;
+  if (depoIndiceAtual < 0) depoIndiceAtual = 0;
+  if (depoIndiceAtual > maxIndice) depoIndiceAtual = 0;
+
+  depoCarrossel.style.transform = `translateX(-${depoIndiceAtual * itemLargura}px)`;
+  reiniciarBarraProgressoDepo();
+}
+
+function iniciarAutoDepo() {
+  depoScroll = setInterval(() => moverDepoimento(1), 5000);
+}
+function reiniciarBarraProgressoDepo() {
+  progressoDepo.style.animation = 'none';
+  progressoDepo.offsetHeight;
+  progressoDepo.style.animation = null;
+}
+iniciarAutoDepo();
+
+document.querySelectorAll('#depoimentos .carrossel-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    clearInterval(depoScroll);
+    moverDepoimento(btn.classList.contains('left') ? -1 : 1);
+    iniciarAutoDepo();
+  });
+});
+
+depoContainer.addEventListener('touchstart', (e) => {
+  startX = e.touches[0].clientX;
+  clearInterval(depoScroll);
+}, { passive: true });
+
+depoContainer.addEventListener('touchend', (e) => {
+  const endX = e.changedTouches[0].clientX;
+  const delta = endX - startX;
+  if (delta > 50) moverDepoimento(-1);
+  else if (delta < -50) moverDepoimento(1);
+  iniciarAutoDepo();
+});
 
 
 </body>
